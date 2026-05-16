@@ -18,7 +18,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
-app.use("/api/jobs", applicationRoutes);
+app.use("/api/applications", applicationRoutes);
 
 
 const connectDB = async () => {
