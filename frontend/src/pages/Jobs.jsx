@@ -51,7 +51,7 @@ const Jobs = () => {
       <button onClick={fetchJobs}>Search</button>
 
       {jobs.map((job) => (
-        <div key={job._id}>
+        <div key={job._id} className="card">
           <h3>{job.title}</h3>
 
           <p>{job.location}</p>

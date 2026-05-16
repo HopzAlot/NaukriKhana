@@ -1,15 +1,15 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Jobs from "./pages/Jobs";
-import JobDetail from "./pages/JobDetail";
-import Dashboard from "./pages/Dashboard";
-import Applicants from "./pages/Applicants";
-import Navbar from "./components/Navbar";
-import CreateJob from "./pages/CreateJob";
+import Login from "../pages/Login";
+import Register from "../pages/Register";
+import Jobs from "../pages/Jobs";
+import JobDetail from "../pages/JobDetail";
+import Dashboard from "../pages/Dashboard";
+import Applicants from "../pages/Applicants";
+import Navbar from "../components/Navbar";
+import CreateJob from "../pages/CreateJob";
 
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 function App() {
   return (
