@@ -8,7 +8,7 @@ const {
 } = require("../controllers/jobController");
 
 const { protect } = require("../middleware/authMiddleware");
-const authorizeRoles = require("../middleware/roleMiddleware");
+const {authorizeRoles} = require("../middleware/roleMiddleware");
 
 router.get("/", getJobs);
 router.get("/:id", getSingleJob);
