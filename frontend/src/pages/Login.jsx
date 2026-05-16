@@ -5,41 +5,65 @@ import { AuthContext } from "../context/AuthContext";
 
 const Login = () => {
   const [form, setForm] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
-
   const { login } = useContext(AuthContext);
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await api.post("/auth/login", form);
+    try {
+      setLoading(true);
+      setError("");
+      setMsg("");
 
-    login(res.data);
+      const res = await api.post("/auth/login", form);
 
-    navigate("/");
+      login(res.data);
+
+      setMsg("Login successful!");
+
+      setTimeout(() => navigate("/"), 800);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        name="email"
-        placeholder="email"
-        onChange={handleChange}
-      />
+    <div className="container">
+      <h2>Login</h2>
 
-      <input
-        name="password"
-        type="password"
-        placeholder="password"
-        onChange={handleChange}
-      />
+      {msg && <p className="success">{msg}</p>}
+      {error && <p className="error">{error}</p>}
 
-      <button>Login</button>
-    </form>
+      <form onSubmit={handleSubmit} className="form">
+        <input
+          name="email"
+          placeholder="email"
+          onChange={(e) =>
+            setForm({ ...form, email: e.target.value })
+          }
+        />
+
+        <input
+          name="password"
+          type="password"
+          placeholder="password"
+          onChange={(e) =>
+            setForm({ ...form, password: e.target.value })
+          }
+        />
+
+        <button disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </button>
+      </form>
+    </div>
   );
 };
 

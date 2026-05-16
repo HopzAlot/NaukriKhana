@@ -9,7 +9,7 @@ const Applicants = () => {
 
   useEffect(() => {
     const fetchApplications = async () => {
-      const res = await api.get(`/jobs/${id}/applications`);
+      const res = await api.get(`/applications/${id}/applications`);
 
       setApplications(res.data);
     };

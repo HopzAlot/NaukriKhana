@@ -8,8 +8,11 @@ const Register = () => {
     role: "candidate",
   });
 
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [error, setError] = useState("");
 
+  const navigate = useNavigate();
   const { login } = useContext(AuthContext);
 
   const handleChange = (e) => {
@@ -19,41 +22,64 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await api.post("/auth/register", form);
+    try {
+      setLoading(true);
+      setError("");
+      setMsg("");
 
-    login(res.data);
+      const res = await api.post("/auth/register", form);
 
-    navigate("/");
+      login(res.data);
+
+      setMsg("Account created successfully!");
+
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        name="name"
-        placeholder="name"
-        onChange={handleChange}
-      />
+    <div className="container">
+      <h2>Register</h2>
 
-      <input
-        name="email"
-        placeholder="email"
-        onChange={handleChange}
-      />
+      {msg && <p className="success">{msg}</p>}
+      {error && <p className="error">{error}</p>}
 
-      <input
-        name="password"
-        type="password"
-        placeholder="password"
-        onChange={handleChange}
-      />
+      <form onSubmit={handleSubmit} className="form">
+        <input
+          name="name"
+          placeholder="name"
+          onChange={handleChange}
+        />
 
-      <select name="role" onChange={handleChange}>
-        <option value="candidate">Candidate</option>
-        <option value="company">Company</option>
-      </select>
+        <input
+          name="email"
+          placeholder="email"
+          onChange={handleChange}
+        />
 
-      <button>Register</button>
-    </form>
+        <input
+          name="password"
+          type="password"
+          placeholder="password"
+          onChange={handleChange}
+        />
+
+        <select name="role" onChange={handleChange}>
+          <option value="candidate">Candidate</option>
+          <option value="company">Company</option>
+        </select>
+
+        <button disabled={loading}>
+          {loading ? "Creating account..." : "Register"}
+        </button>
+      </form>
+    </div>
   );
 };
 

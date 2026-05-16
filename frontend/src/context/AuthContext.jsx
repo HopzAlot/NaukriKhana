@@ -9,22 +9,25 @@ export const AuthProvider = ({ children }) => {
     const storedUser = localStorage.getItem("user");
 
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+      }
     }
   }, []);
 
   const login = (data) => {
     setUser(data);
-
-    localStorage.setItem("user", JSON.stringify(data));
     localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data));
   };
 
   const logout = () => {
     setUser(null);
-
-    localStorage.removeItem("user");
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
   };
 
   return (

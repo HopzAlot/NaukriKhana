@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 const CreateJob = () => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
   const [form, setForm] = useState({
     title: "",
@@ -23,11 +25,15 @@ const CreateJob = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await api.post("/jobs", form);
-
-    alert("Job created successfully");
-
-    navigate("/dashboard");
+    try {
+      if (user?.role !== "company") {
+        return alert("Only companies can create jobs");
+      }
+      alert("Job created successfully");
+      navigate("/dashboard");
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to create job");
+    }
   };
 
   return (
@@ -69,9 +75,7 @@ const CreateJob = () => {
           onChange={handleChange}
         />
 
-        <button type="submit">
-          Create Job
-        </button>
+        <button type="submit">Create Job</button>
       </form>
     </div>
   );

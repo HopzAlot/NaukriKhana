@@ -14,9 +14,11 @@ import ProtectedRoute from "../components/ProtectedRoute";
 function App() {
   return (
     <BrowserRouter>
-    <Navbar />
+      <Navbar />
+
       <Routes>
         <Route path="/" element={<Jobs />} />
+        <Route path="/jobs" element={<Jobs />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/jobs/:id" element={<JobDetail />} />
@@ -24,7 +26,7 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["company"]}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -33,18 +35,28 @@ function App() {
         <Route
           path="/jobs/:id/applications"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["company"]}>
               <Applicants />
             </ProtectedRoute>
           }
         />
+
         <Route
-        path="/create-job"
-        element={
-            <ProtectedRoute>
-            <CreateJob />
+          path="/dashboard/jobs/:id/applicants"
+          element={
+            <ProtectedRoute allowedRoles={["company"]}>
+              <Applicants />
             </ProtectedRoute>
-        }
+          }
+        />
+
+        <Route
+          path="/create-job"
+          element={
+            <ProtectedRoute allowedRoles={["company"]}>
+              <CreateJob />
+            </ProtectedRoute>
+          }
         />
       </Routes>
     </BrowserRouter>

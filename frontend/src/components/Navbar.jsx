@@ -1,30 +1,39 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/jobs");
+  };
 
   return (
-    <nav>
-      <Link to="/">Jobs</Link>
+    <nav className="navbar">
+      <Link className="brand" to="/jobs">NaukriKhana</Link>
+      <NavLink to="/jobs">Jobs</NavLink>
 
-      {!user && <Link to="/login">Login</Link>}
+      <div className="nav-actions">
+        {!user && <NavLink to="/login">Login</NavLink>}
+        {!user && <NavLink to="/register">Register</NavLink>}
 
-      {!user && <Link to="/register">Register</Link>}
+        {user?.role === "company" && (
+          <>
+            <NavLink to="/dashboard">Dashboard</NavLink>
+            <NavLink to="/create-job">Create Job</NavLink>
+          </>
+        )}
 
-      {user?.role === "company" && (
-    <>
-        <Link to="/dashboard">Dashboard</Link>
-        <Link to="/create-job">Create Job</Link>
-    </>
-    )}
-
-      {user && (
-        <button onClick={logout}>
-          Logout
-        </button>
-      )}
+        {user && (
+          <>
+            <span className="nav-user">{user.name}</span>
+            <button className="secondary" onClick={handleLogout}>Logout</button>
+          </>
+        )}
+      </div>
     </nav>
   );
 };
