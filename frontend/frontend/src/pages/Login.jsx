@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 const Login = () => {
   const [form, setForm] = useState({});
   const navigate = useNavigate();
+
+  const { login } = useContext(AuthContext);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -15,15 +18,25 @@ const Login = () => {
 
     const res = await api.post("/auth/login", form);
 
-    localStorage.setItem("token", res.data.token);
+    login(res.data);
 
     navigate("/");
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <input name="email" placeholder="email" onChange={handleChange} />
-      <input name="password" placeholder="password" type="password" onChange={handleChange} />
+      <input
+        name="email"
+        placeholder="email"
+        onChange={handleChange}
+      />
+
+      <input
+        name="password"
+        type="password"
+        placeholder="password"
+        onChange={handleChange}
+      />
 
       <button>Login</button>
     </form>
