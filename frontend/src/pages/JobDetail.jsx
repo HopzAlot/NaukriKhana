@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext } from "react";
 import api from "../api/axios";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 const JobDetail = () => {
@@ -8,121 +8,146 @@ const JobDetail = () => {
   const { user } = useContext(AuthContext);
 
   const [job, setJob] = useState(null);
-  const [applications, setApplications] = useState([]);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
-
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    resumeLink: "",
-  });
-
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  const [form, setForm] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    resumeLink: "",
+  });
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchJob = async () => {
       try {
+        setLoading(true);
+        setError("");
         const jobRes = await api.get(`/jobs/${id}`);
         setJob(jobRes.data);
-
-        const appRes = await api.get(`/jobs/${id}/applications`);
-        setApplications(appRes.data);
-
-        if (user) {
-          const found = appRes.data.find(
-            (app) =>
-                app.appliedBy?._id === user._id ||
-                app.appliedBy === user._id
-            );
-
-          setAlreadyApplied(!!found);
-        }
       } catch (err) {
-        console.log(err);
+        setError(err?.response?.data?.message || "Failed to load job");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [id, user]);
+    fetchJob();
+  }, [id]);
 
-  const handleApply = async () => {
+  useEffect(() => {
+    setForm((current) => ({
+      ...current,
+      name: current.name || user?.name || "",
+      email: current.email || user?.email || "",
+    }));
+  }, [user]);
+
+  const handleApply = async (e) => {
+    e.preventDefault();
+
     if (alreadyApplied) return;
 
+    if (!user) {
+      setError("Please login as a candidate to apply.");
+      return;
+    }
+
+    if (user.role !== "candidate") {
+      setError("Only candidates can apply for jobs.");
+      return;
+    }
+
     if (!form.name || !form.email || !form.resumeLink) {
-      alert("Please fill all fields");
+      setError("Please fill all fields");
       return;
     }
 
     try {
       setSubmitting(true);
+      setError("");
+      setMessage("");
 
-      await api.post(`/jobs/${id}/apply`, form);
+      await api.post(`/applications/${id}/apply`, form);
 
-      alert("Applied successfully");
-
+      setMessage("Application submitted successfully");
       setAlreadyApplied(true);
     } catch (err) {
-      alert(err?.response?.data?.message || "Failed to apply");
+      const applyError = err?.response?.data?.message || "Failed to apply";
+      setError(applyError);
+
+      if (applyError.toLowerCase().includes("already applied")) {
+        setAlreadyApplied(true);
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
   if (loading) {
-    return <div className="container">Loading...</div>;
+    return <div className="container">Loading job...</div>;
+  }
+
+  if (error && !job) {
+    return (
+      <div className="container">
+        <p className="error">{error}</p>
+      </div>
+    );
   }
 
   return (
     <div className="container">
       <div className="card">
         <h2>{job.title}</h2>
+        <p className="muted">{job.postedBy?.name || "Company"}</p>
         <p>{job.description}</p>
-        <p>{job.location}</p>
-        <p>{job.type}</p>
-        <p>{job.salary}</p>
+        <div className="meta">
+          <span>{job.location || "Remote"}</span>
+          <span>{job.type || "Not specified"}</span>
+          <span>{job.salary ? `Rs. ${job.salary}` : "Salary not listed"}</span>
+        </div>
       </div>
 
       <div className="card">
         <h3>Apply for this job</h3>
+        {message && <p className="success">{message}</p>}
+        {error && <p className="error">{error}</p>}
 
-        {alreadyApplied ? (
-          <p style={{ color: "green", fontWeight: "bold" }}>
-            ✔ Already Applied
+        {!user ? (
+          <p>
+            <Link to="/login">Login</Link> as a candidate to apply.
           </p>
+        ) : user.role !== "candidate" ? (
+          <p className="muted">Company accounts can view applicants from the dashboard.</p>
         ) : (
-          <div className="form">
+          <form className="form" onSubmit={handleApply}>
             <input
               placeholder="Full Name"
-              onChange={(e) =>
-                setForm({ ...form, name: e.target.value })
-              }
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
 
             <input
               placeholder="Email"
-              onChange={(e) =>
-                setForm({ ...form, email: e.target.value })
-              }
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
 
             <input
               placeholder="Resume Link"
-              onChange={(e) =>
-                setForm({ ...form, resumeLink: e.target.value })
-              }
+              type="url"
+              value={form.resumeLink}
+              onChange={(e) => setForm({ ...form, resumeLink: e.target.value })}
             />
 
-            <button
-              onClick={handleApply}
-              disabled={submitting}
-            >
+            <button disabled={submitting}>
               {submitting ? "Applying..." : "Apply"}
             </button>
-          </div>
+          </form>
         )}
       </div>
     </div>

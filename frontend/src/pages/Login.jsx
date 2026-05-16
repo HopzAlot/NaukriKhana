@@ -26,7 +26,9 @@ const Login = () => {
 
       setMsg("Login successful!");
 
-      setTimeout(() => navigate("/"), 800);
+      setTimeout(() => {
+        navigate(res.data.role === "company" ? "/dashboard" : "/jobs");
+      }, 500);
     } catch (err) {
       setError(err?.response?.data?.message || "Login failed");
     } finally {
@@ -44,7 +46,9 @@ const Login = () => {
       <form onSubmit={handleSubmit} className="form">
         <input
           name="email"
+          type="email"
           placeholder="email"
+          required
           onChange={(e) =>
             setForm({ ...form, email: e.target.value })
           }
@@ -54,6 +58,7 @@ const Login = () => {
           name="password"
           type="password"
           placeholder="password"
+          required
           onChange={(e) =>
             setForm({ ...form, password: e.target.value })
           }

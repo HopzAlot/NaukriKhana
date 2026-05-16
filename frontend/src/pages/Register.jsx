@@ -34,8 +34,8 @@ const Register = () => {
       setMsg("Account created successfully!");
 
       setTimeout(() => {
-        navigate("/");
-      }, 1000);
+        navigate(res.data.role === "company" ? "/dashboard" : "/jobs");
+      }, 500);
     } catch (err) {
       setError(err?.response?.data?.message || "Registration failed");
     } finally {
@@ -54,12 +54,15 @@ const Register = () => {
         <input
           name="name"
           placeholder="name"
+          required
           onChange={handleChange}
         />
 
         <input
           name="email"
+          type="email"
           placeholder="email"
+          required
           onChange={handleChange}
         />
 
@@ -67,10 +70,11 @@ const Register = () => {
           name="password"
           type="password"
           placeholder="password"
+          required
           onChange={handleChange}
         />
 
-        <select name="role" onChange={handleChange}>
+        <select name="role" value={form.role} onChange={handleChange}>
           <option value="candidate">Candidate</option>
           <option value="company">Company</option>
         </select>

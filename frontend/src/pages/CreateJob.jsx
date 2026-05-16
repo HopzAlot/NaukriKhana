@@ -6,6 +6,9 @@ import { AuthContext } from "../context/AuthContext";
 const CreateJob = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     title: "",
@@ -26,31 +29,52 @@ const CreateJob = () => {
     e.preventDefault();
 
     try {
+      setError("");
+      setMessage("");
       if (user?.role !== "company") {
-        return alert("Only companies can create jobs");
+        setError("Only companies can create jobs");
+        return;
       }
-      alert("Job created successfully");
-      navigate("/dashboard");
+
+      if (!form.title || !form.description || !form.salary || !form.location || !form.type) {
+        setError("Please fill all fields");
+        return;
+      }
+
+      setLoading(true);
+      await api.post("/jobs", {
+        ...form,
+        salary: Number(form.salary),
+      });
+
+      setMessage("Job created successfully");
+      setTimeout(() => navigate("/dashboard"), 700);
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to create job");
+      setError(err.response?.data?.message || "Failed to create job");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="container">
       <h2>Create Job</h2>
+      {message && <p className="success">{message}</p>}
+      {error && <p className="error">{error}</p>}
 
       <form onSubmit={handleSubmit} className="form">
         <input
           type="text"
           name="title"
           placeholder="Job Title"
+          value={form.title}
           onChange={handleChange}
         />
 
         <textarea
           name="description"
           placeholder="Job Description"
+          value={form.description}
           onChange={handleChange}
         />
 
@@ -58,6 +82,8 @@ const CreateJob = () => {
           type="number"
           name="salary"
           placeholder="Salary"
+          min="0"
+          value={form.salary}
           onChange={handleChange}
         />
 
@@ -65,17 +91,26 @@ const CreateJob = () => {
           type="text"
           name="location"
           placeholder="Location"
+          value={form.location}
           onChange={handleChange}
         />
 
-        <input
-          type="text"
+        <select
           name="type"
-          placeholder="Full-Time / Part-Time"
+          value={form.type}
           onChange={handleChange}
-        />
+        >
+          <option value="">Select job type</option>
+          <option value="Full-Time">Full-Time</option>
+          <option value="Part-Time">Part-Time</option>
+          <option value="Internship">Internship</option>
+          <option value="Contract">Contract</option>
+          <option value="Remote">Remote</option>
+        </select>
 
-        <button type="submit">Create Job</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Creating..." : "Create Job"}
+        </button>
       </form>
     </div>
   );
