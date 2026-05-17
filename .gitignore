@@ -1,3 +1,4 @@
 node_modules/
 tempCodeRunnerFile.js
 .env
+./backend/.env
